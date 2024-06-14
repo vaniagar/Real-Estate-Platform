@@ -24,18 +24,17 @@ contract payment
         balance[msg.sender]=balance[msg.sender]+msg.value;
     }
 
-    function transfer(/*uint256 addressto_,*/uint256 amount_) public onlyAdmin
+    function transfer(address to_,uint256 amount_) public onlyAdmin
     {
-        require(balance[msg.sender] >=amount_, "Insufficient balance, try again");
-        //transfer statement payable function?
-
-
+        require(address(this).balance >=amount_, "Insufficient balance, try again");
+        payable(to_).transfer(amount_);
     }
+
 
     function withdrawal(uint256 amount_) public  
     {
         require(balance[msg.sender] >=amount_, "Insufficient balance, try again");
-        //transfering money statement, how to do, payable function?
+        payable(msg.sender).transfer(amount_);
         balance[msg.sender]=balance[msg.sender]-amount_;
 
 
