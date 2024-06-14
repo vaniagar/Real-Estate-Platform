@@ -1,0 +1,47 @@
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract payment
+{
+
+    address public admin;
+    mapping(address => uint256) public balance;
+
+    modifier onlyAdmin()
+    {
+        require(msg.sender==admin,"Only admin can perform this action.");
+        _;
+
+    }
+
+    constructor()
+    {
+        admin=msg.sender;
+    }
+
+    function deposit() public payable
+    {
+        balance[msg.sender]=balance[msg.sender]+msg.value;
+    }
+
+    function transfer(/*uint256 addressto_,*/uint256 amount_) public onlyAdmin
+    {
+        require(balance[msg.sender] >=amount_, "Insufficient balance, try again");
+        //transfer statement payable function?
+
+
+    }
+
+    function withdrawal(uint256 amount_) public  
+    {
+        require(balance[msg.sender] >=amount_, "Insufficient balance, try again");
+        //transfering money statement, how to do, payable function?
+        balance[msg.sender]=balance[msg.sender]-amount_;
+
+
+    }
+
+
+
+
+}
