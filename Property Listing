@@ -1,1 +1,65 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >= 0.7.0 <0.9.0;
 
+contract Listing{
+
+    struct Property{
+        uint256 id;
+        address owner;
+        string description;
+        uint256 price;
+        bool isListed;
+
+    }
+
+    uint256 newPropertyId=1;
+    uint256 currentPropertyId;
+    mapping(uint256 => Property) public properties;
+    
+    
+    function ListingProp(string memory description, uint price) public       //to put property on sale
+    {
+        currentPropertyId=newPropertyId;
+        properties[newPropertyId] = Property({
+            id: newPropertyId,
+            owner: msg.sender,
+            description: description,
+            price: price,
+            isListed: true});
+
+        newPropertyId=newPropertyId+1;
+
+
+    }
+
+    function delistProp(uint256 propertyId) public            //to remove property from sale
+    {
+        Property storage property = properties[propertyId];
+        require(property.owner == msg.sender, "Only the owner can delist the property");
+        require(property.isListed, "Property is not listed");
+
+        property.isListed = false;
+    }
+
+    function buyProp(uint256 propertyId) public payable 
+    {
+        Property storage property = properties[propertyId];
+        require(property.isListed, "Property is not listed for sale");
+        require(msg.value >= property.price, "Insufficient payment");
+
+        address prevOwner=property.owner;
+
+        property.owner=msg.sender;
+        property.isListed=false;
+
+        payable(prevOwner).transfer(msg.value);
+                                              
+    }
+
+    function transfer() public              //required to transfer ownership from prev to new when burProp is called
+    {}                                      //predefined???   //OpenZeppelin ERC721 ??
+
+    
+
+    
+}
