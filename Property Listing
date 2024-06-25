@@ -1,33 +1,49 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >= 0.7.0 <0.9.0;
 
-contract Listing{
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+
+contract Listing is ERC721, Ownable{
+
+    using Counters for Counters.Counter;
+    Counters.Counter private _propertyIds;   //for property id
 
     struct Property{
         uint256 id;
         address owner;
         string description;
+        string ipfsHash; // IPFS Hash for property media
         uint256 price;
         bool isListed;
 
     }
 
-    uint256 newPropertyId=1;
-    uint256 currentPropertyId;
     mapping(uint256 => Property) public properties;
+
+    event PropertyListed(uint256 indexed propertyId, address indexed owner, uint256 price);
+    event DeListProperty(uitn256 indexed propertyId, address indexed owner);
+    evemt PropertyBought(uitn256 indexed propertyId, address indexed buyer, uint256 price);
+
     
     
-    function ListingProp(string memory description, uint price) public       //to put property on sale
+    function ListingProp(string memory description, string memory ipfsHash, uint price) public onlyOwner      //to put property on sale
     {
-        currentPropertyId=newPropertyId;
+        _propertyIds.increment();
+        uint256 newPropertyId = _propertyIds.current();
+
         properties[newPropertyId] = Property({
             id: newPropertyId,
             owner: msg.sender,
             description: description,
+            ipfsHash: ipfsHash,
             price: price,
             isListed: true});
 
-        newPropertyId=newPropertyId+1;
+        _mint(msg.sender, newPropertyId);
+        emit PropertyListed(newPropertyId, msg.sender, price);  //to display
+       
 
 
     }
@@ -39,6 +55,7 @@ contract Listing{
         require(property.isListed, "Property is not listed");
 
         property.isListed = false;
+        event DeListProperty(propertyId, msg.sender);
     }
 
     function buyProp(uint256 propertyId) public payable 
@@ -52,14 +69,26 @@ contract Listing{
         property.owner=msg.sender;
         property.isListed=false;
 
+        _transfer(previousOwner, msg.sender, propertyId);
         payable(prevOwner).transfer(msg.value);
+        emit PropertyBought(propertyId, msg.sender, property.price); 
                                               
     }
 
-    function transfer() public              //required to transfer ownership from prev to new when burProp is called
-    {}                                      //predefined???   //OpenZeppelin ERC721 ??
-
-    
-
+    function getProperties() public view returns (Property [] memory)
+    {
+         uint256 totalProperties = _propertyIds.current();
+         Property[] memory listedProperties = new Property[] (totalProperties);
+         uint256 counter=0;
+         for (uint256 i=1; i<=totalProperties, i++)
+         {
+              if(properties[i].isListed)
+              {
+                   listedProperties[counter] = properties[i];
+                   counter++;
+              }
+         }
+      return listedProperties;
+      }
     
 }
