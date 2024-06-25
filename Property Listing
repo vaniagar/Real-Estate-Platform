@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract RealEstatePlatform is ERC721, Ownable 
+contract RealEstatePlatform is ERC721URIStorage, Ownable 
 {
 
     using Counters for Counters.Counter;
@@ -27,7 +27,7 @@ contract RealEstatePlatform is ERC721, Ownable
     event DeListProperty(uint256 indexed propertyId, address indexed owner);
     event PropertyBought(uint256 indexed propertyId, address indexed buyer, uint256 price);
      
-    constructor() ERC721("RealEstatePlatform" , "REP") {}
+    constructor() ERC721URIStorage("RealEstatePlatform" , "REP") {}
 
     
     
