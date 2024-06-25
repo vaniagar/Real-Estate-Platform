@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >= 0.7.0 <0.9.0;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Listing is ERC721, Ownable{
+contract RealEstatePlatform is ERC721, Ownable 
+{
 
     using Counters for Counters.Counter;
     Counters.Counter private _propertyIds;   //for property id
@@ -23,8 +24,10 @@ contract Listing is ERC721, Ownable{
     mapping(uint256 => Property) public properties;
 
     event PropertyListed(uint256 indexed propertyId, address indexed owner, uint256 price);
-    event DeListProperty(uitn256 indexed propertyId, address indexed owner);
-    evemt PropertyBought(uitn256 indexed propertyId, address indexed buyer, uint256 price);
+    event DeListProperty(uint256 indexed propertyId, address indexed owner);
+    event PropertyBought(uint256 indexed propertyId, address indexed buyer, uint256 price);
+     
+    constructor() ERC721("RealEstatePlatform" , "REP") {}
 
     
     
@@ -43,9 +46,6 @@ contract Listing is ERC721, Ownable{
 
         _mint(msg.sender, newPropertyId);
         emit PropertyListed(newPropertyId, msg.sender, price);  //to display
-       
-
-
     }
 
     function delistProp(uint256 propertyId) public            //to remove property from sale
@@ -55,7 +55,7 @@ contract Listing is ERC721, Ownable{
         require(property.isListed, "Property is not listed");
 
         property.isListed = false;
-        event DeListProperty(propertyId, msg.sender);
+        emit DeListProperty(propertyId, msg.sender);
     }
 
     function buyProp(uint256 propertyId) public payable 
@@ -69,7 +69,7 @@ contract Listing is ERC721, Ownable{
         property.owner=msg.sender;
         property.isListed=false;
 
-        _transfer(previousOwner, msg.sender, propertyId);
+        _transfer(prevOwner, msg.sender, propertyId);
         payable(prevOwner).transfer(msg.value);
         emit PropertyBought(propertyId, msg.sender, property.price); 
                                               
@@ -77,18 +77,18 @@ contract Listing is ERC721, Ownable{
 
     function getProperties() public view returns (Property [] memory)
     {
-         uint256 totalProperties = _propertyIds.current();
-         Property[] memory listedProperties = new Property[] (totalProperties);
-         uint256 counter=0;
-         for (uint256 i=1; i<=totalProperties, i++)
-         {
-              if(properties[i].isListed)
-              {
-                   listedProperties[counter] = properties[i];
-                   counter++;
-              }
-         }
-      return listedProperties;
-      }
+        uint256 totalProperties = _propertyIds.current();
+        Property[] memory listedProperties = new Property[](totalProperties);
+        uint256 counter=0;
+        for (uint256 i=1; i<=totalProperties ; i++)
+        {
+            if(properties[i].isListed)
+            {
+                listedProperties[counter] = properties[i];
+                counter++;
+            }
+        }
+        return listedProperties;
+    }
     
 }
